@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "Laracasts Subtitle Translator",
-  "description": "Traduce i sottotitoli dei video su Laracasts e mostra originale + traduzione.",
+  "name": "Vimeo Subtitle Translator",
+  "description": "Translates Vimeo subtitles and shows original + translated text.",
   "version": "0.2.5",
   "permissions": [
     "storage"
   ],
   "host_permissions": [
-    "https://laracasts.com/*",
-    "https://*.laracasts.com/*",
+    "https://vimeo.com/*",
+    "https://*.vimeo.com/*",
     "https://translate.googleapis.com/*",
     "https://clients5.google.com/*"
   ],
@@ -18,12 +18,15 @@
   "content_scripts": [
     {
       "matches": [
-        "https://laracasts.com/*",
-        "https://*.laracasts.com/*"
+        "https://*/*",
+        "http://*/*"
       ],
       "js": [
         "content.js"
       ],
+      "all_frames": true,
+      "match_about_blank": true,
+      "match_origin_as_fallback": true,
       "run_at": "document_idle"
     }
   ],

@@ -1,34 +1,34 @@
-# Laracasts Subtitle Translator (Chrome Extension)
+# Vimeo Subtitle Translator (Chrome Extension)
 
-Estensione Chrome (Manifest V3) per tradurre i sottotitoli dei video su Laracasts.
+Chrome extension (Manifest V3) that translates subtitles from Vimeo players.
 
-## Funzioni
+## Features
 
-- Traduzione sottotitoli in tempo reale
-- Modalita `Tradotto + originale`, `Solo tradotto`, `Solo originale`
-- Selettore lingua dal popup estensione
-- Sottotitoli trascinabili direttamente sul testo
-- Slider nel popup per aumentare/diminuire dimensione font
-- Toggle sfondo sottotitoli con slider opacita
-- Cache locale in memoria per evitare richieste duplicate
+- Real-time subtitle translation
+- Modes: `Translated + original`, `Translated only`, `Original only`
+- Language selector from the extension popup
+- Subtitles can be dragged directly by dragging the text
+- Popup slider to increase/decrease font size
+- Subtitle background toggle with opacity slider
+- In-memory local cache to avoid duplicate requests
 
-## Installazione locale
+## Local installation
 
-1. Apri `chrome://extensions`
-2. Attiva `Modalita sviluppatore`
-3. Clicca `Carica estensione non pacchettizzata`
-4. Seleziona la cartella `laracasts-subtitle-translator`
+1. Open `chrome://extensions`
+2. Enable `Developer mode`
+3. Click `Load unpacked`
+4. Select the `vimeo-subtitle-translator` folder
 
-## Uso
+## Usage
 
-1. Apri una lezione su Laracasts
-2. Assicurati che i sottotitoli originali siano disponibili nel player
-3. Clicca l'icona estensione e scegli lingua/modalita
-4. Trascina direttamente il testo sottotitoli per riposizionarli
-5. Usa `Reset posizione sottotitoli` nel popup per tornare alla posizione automatica
+1. Open any page with a Vimeo video (vimeo.com or an embedded Vimeo player)
+2. Make sure original subtitles are available in the player
+3. Click the extension icon and choose language/mode
+4. Drag the subtitle text directly to reposition it
+5. Use `Reset subtitle position` in the popup to restore automatic placement
 
-## Limiti noti
+## Known limitations
 
-- Dipende dalla disponibilita delle tracce sottotitoli nel player
-- In fullscreen nativo del browser il posizionamento puo variare in base al player
-- Usa endpoint di traduzione non ufficiale; se rate-limitato la traduzione puo interrompersi
+- Depends on subtitle track availability in the player
+- In native browser fullscreen, positioning may vary by player
+- Uses unofficial translation endpoints; translation may stop if rate-limited

@@ -1,112 +1,112 @@
-# AGENTS.md - Guida operativa per nuove sessioni agentiche
+# AGENTS.md - Operational Guide for New Agent Sessions
 
-Questo documento serve come contesto persistente per chi riprende il progetto in una nuova sessione.
+This document serves as persistent context for anyone resuming this project in a new session.
 
-## 1) Obiettivo del progetto
+## 1) Project Goal
 
-Estensione Chrome (Manifest V3) per Laracasts/Vimeo che:
+Chrome extension (Manifest V3) for Vimeo players that:
 
-- intercetta i sottotitoli del player,
-- traduce in tempo reale,
-- mostra un overlay custom trascinabile,
-- permette configurazione da popup (lingua, modalita, font, hide native captions),
-- evita la sovrapposizione con i sottotitoli nativi del player.
+- intercepts player subtitles,
+- translates them in real time,
+- shows a custom draggable overlay,
+- allows configuration from the popup (language, mode, font, hide native captions),
+- avoids overlap with native player subtitles.
 
-## 2) Stato attuale (importante)
+## 2) Current Status (Important)
 
-Lo stato corrente e considerato **buono/stabile**:
+The current status is considered **good/stable**:
 
-- generazione sottotitoli extension: OK,
-- drag overlay: OK,
-- switch modalita (`both` / `translated` / `original`): OK,
-- controllo dimensione font: OK,
-- persistenza impostazioni su `chrome.storage.sync`: OK,
-- push su GitHub gia eseguito (`main`).
+- extension subtitle generation: OK,
+- overlay drag: OK,
+- mode switching (`both` / `translated` / `original`): OK,
+- font size control: OK,
+- settings persistence via `chrome.storage.sync`: OK,
+- push to GitHub already done (`main`).
 
-Nota critica: in passato ci sono state regressioni severe (pagina bianca / sottotitoli spariti). Prima di toccare la logica di hide native captions, leggere la sezione "Rischi e anti-regressione".
+Critical note: severe regressions happened in the past (blank page / missing subtitles). Before touching hide native captions logic, read the "Risks and Regression Prevention" section.
 
-## 3) Struttura file
+## 3) File Structure
 
-- `manifest.json`: configurazione extension MV3, permissions, content script, service worker, popup.
-- `background.js`: traduzione tramite endpoint Google (fallback multipli), gestione messaggi runtime.
-- `content.js`: logica principale (video detection, text tracks, rendering overlay, drag, hide native captions, settings sync).
-- `popup.html`: UI impostazioni extension.
-- `popup.js`: binding popup -> `chrome.storage.sync`.
-- `README.md`: installazione/uso locale.
+- `manifest.json`: MV3 extension configuration, permissions, content script, service worker, popup.
+- `background.js`: translation via Google endpoints (multiple fallbacks), runtime message handling.
+- `content.js`: main logic (video detection, text tracks, overlay rendering, drag, hide native captions, settings sync).
+- `popup.html`: extension settings UI.
+- `popup.js`: popup binding to `chrome.storage.sync`.
+- `README.md`: local install/usage instructions.
 
-## 4) Flusso tecnico corrente
+## 4) Current Technical Flow
 
-1. `content.js` rileva il video principale in pagina (anche con elementi dinamici).
-2. Prova a legarsi ai `TextTrack` (`subtitles` / `captions`).
-3. Se necessario "risveglia" track elements per forzare caricamento cues.
-4. Sui `cuechange` ottiene testo sorgente, traduce via `chrome.runtime.sendMessage` al `background.js`.
-5. Renderizza testo in overlay custom.
-6. In base a impostazioni, nasconde i sottotitoli nativi in modo controllato.
+1. `content.js` detects the main video on the page (including dynamic elements).
+2. It tries to bind to `TextTrack` (`subtitles` / `captions`).
+3. If needed, it "wakes up" track elements to force cue loading.
+4. On `cuechange`, it reads source text and translates via `chrome.runtime.sendMessage` to `background.js`.
+5. It renders text in the custom overlay.
+6. Based on settings, it hides native subtitles in a controlled way.
 
-## 5) Rischi e anti-regressione (OBBLIGATORIO)
+## 5) Risks and Regression Prevention (MANDATORY)
 
-### 5.1 Non nascondere container globali
+### 5.1 Do Not Hide Global Containers
 
-In una regressione precedente un fallback aggressivo nascondeva antenati DOM e portava pagina bianca.
+In a previous regression, an aggressive fallback hid DOM ancestors and caused a blank page.
 
-Regole:
+Rules:
 
-- non usare hide su `html`, `body`, wrapper macro,
-- non nascondere antenati senza limiti stretti,
-- evitare `display:none` su nodi non chiaramente caption-like,
-- preferire hide mirato con filtri su rettangolo/posizione/dimensioni/testo.
+- do not hide `html`, `body`, or large wrapper containers,
+- do not hide ancestors without strict limits,
+- avoid `display:none` on nodes that are not clearly caption-like,
+- prefer targeted hiding with filters on rectangle/position/size/text.
 
-### 5.2 `TextTrack.mode` e loading cues
+### 5.2 `TextTrack.mode` and Cue Loading
 
-Su alcuni player i cues non arrivano se track non e "attivata".
+On some players, cues do not arrive if the track is not "activated".
 
-Strategia corrente:
+Current strategy:
 
-- fase warm-up possibile con `showing` per far caricare cues,
-- poi gestione rendering nativo tramite hide controllato,
-- evitare di lasciare il sistema in stato senza cues + native hidden.
+- optional warm-up phase with `showing` to load cues,
+- then native rendering management through controlled hide,
+- avoid leaving the system in a no-cues + native-hidden state.
 
 ### 5.3 Fail-safe
 
-Se overlay non ha testo, i native captions non devono restare nascosti per sempre.
+If the overlay has no text, native captions must not stay hidden forever.
 
-## 6) Comportamento atteso (acceptance criteria)
+## 6) Expected Behavior (Acceptance Criteria)
 
-Una modifica e accettabile solo se tutte le condizioni sono vere:
+A change is acceptable only if all of the following are true:
 
-1. pagina Laracasts non diventa bianca attivando extension,
-2. almeno una lezione mostra sottotitoli extension in play,
-3. drag overlay funziona,
-4. switch modalita nel popup applicato in tempo reale,
-5. slider font applicato in tempo reale,
-6. toggling `Nascondi sottotitoli player` produce effetto coerente,
-7. disabilitando extension, il player torna utilizzabile (nessun stato sporco persistente),
-8. nessun errore JS bloccante in console.
+1. a page with a Vimeo player does not become blank when enabling the extension,
+2. at least one Vimeo video shows extension subtitles during playback,
+3. overlay drag works,
+4. popup mode switch is applied in real time,
+5. font slider is applied in real time,
+6. toggling `Hide player subtitles` produces coherent behavior,
+7. when disabling the extension, the player remains usable (no persistent dirty state),
+8. no blocking JS errors in the console.
 
-## 7) Checklist operativa per future modifiche
+## 7) Operational Checklist for Future Changes
 
-Quando un agent fa cambi non banali in `content.js`:
+When an agent makes non-trivial changes in `content.js`:
 
-1. mantenere cambi piccoli e isolati,
-2. non introdurre fallback distruttivi su DOM globale,
-3. eseguire syntax check locale:
+1. keep changes small and isolated,
+2. do not introduce destructive fallbacks on the global DOM,
+3. run local syntax checks:
    - `node --check content.js`
    - `node --check background.js`
    - `node --check popup.js`
    - `python3 -m json.tool manifest.json >/dev/null`
-4. ricaricare extension in `chrome://extensions`,
-5. test manuale rapido su video Laracasts.
+4. reload the extension in `chrome://extensions`,
+5. run a quick manual test on a Vimeo video.
 
-## 8) Debug rapido consigliato
+## 8) Recommended Quick Debug
 
-Se qualcosa non funziona:
+If something does not work:
 
-- verificare textTracks esposti:
+- check exposed textTracks:
 ```js
 Array.from(document.querySelector("video")?.textTracks || []).map(t => ({kind:t.kind,label:t.label,lang:t.language,mode:t.mode,cues:t.cues?.length}))
 ```
 
-- verificare quanti video/track ci sono in pagina:
+- check how many videos/tracks are on the page:
 ```js
 [...document.querySelectorAll("video")].map((v,i)=>({
   i,
@@ -117,35 +117,35 @@ Array.from(document.querySelector("video")?.textTracks || []).map(t => ({kind:t.
 }))
 ```
 
-- controllare errori runtime in console della pagina e in service worker dell'estensione.
+- check runtime errors in the page console and in the extension service worker.
 
-## 9) Priorita prossimi interventi (se richiesti)
+## 9) Priority for Next Interventions (If Requested)
 
-1. Ridurre complessita di `content.js` in moduli logici (track manager / overlay manager / settings manager).
-2. Aggiungere debug mode opzionale nel popup (es. stato track/cues in overlay).
-3. Migliorare detection caption per player non standard senza introdurre regressioni visive.
-4. Valutare provider traduzione con API key (DeepL/OpenAI) come alternativa stabile.
+1. Reduce `content.js` complexity into logical modules (track manager / overlay manager / settings manager).
+2. Add optional debug mode in the popup (e.g., track/cue state in the overlay).
+3. Improve caption detection for non-standard players without introducing visual regressions.
+4. Evaluate translation providers with API keys (DeepL/OpenAI) as a stable alternative.
 
-## 10) Regole di modifica consigliate
+## 10) Recommended Change Rules
 
-- Preferire robustezza a feature "furbe".
-- Se un fix e incerto, introdurre feature flag/toggle invece di cambiare comportamento globale.
-- Ogni volta che si tocca hide native captions, fare test con:
-  - extension abilitata,
-  - extension disabilitata,
+- Prefer robustness over "clever" features.
+- If a fix is uncertain, introduce a feature flag/toggle instead of changing global behavior.
+- Every time hide native captions logic is touched, test with:
+  - extension enabled,
+  - extension disabled,
   - hideNative ON,
   - hideNative OFF.
 
-## 11) Comandi git utili
+## 11) Useful Git Commands
 
 ```bash
 git status
 git diff
 git add .
-git commit -m "<messaggio>"
+git commit -m "<message>"
 git push
 ```
 
-Repository remoto:
+Remote repository:
 
 - `git@github.com:gghidoni/vimeo-subtitle-translator.git`
