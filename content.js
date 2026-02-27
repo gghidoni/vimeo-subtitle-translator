@@ -4,6 +4,8 @@ const DEFAULT_SETTINGS = {
   displayMode: "both",
   hideNative: true,
   fontSize: 32,
+  subtitleBackground: false,
+  subtitleBackgroundOpacity: 55,
   position: null
 };
 
@@ -63,6 +65,10 @@ async function init() {
 function normalizeSettings(raw) {
   const fontSize = Number(raw.fontSize);
   const parsedFontSize = Number.isFinite(fontSize) ? Math.min(72, Math.max(16, fontSize)) : DEFAULT_SETTINGS.fontSize;
+  const subtitleBackgroundOpacity = Number(raw.subtitleBackgroundOpacity);
+  const parsedSubtitleBackgroundOpacity = Number.isFinite(subtitleBackgroundOpacity)
+    ? Math.round(clamp(subtitleBackgroundOpacity, 0, 100))
+    : DEFAULT_SETTINGS.subtitleBackgroundOpacity;
 
   const position =
     raw.position && Number.isFinite(raw.position.xPct) && Number.isFinite(raw.position.yPct)
@@ -81,6 +87,9 @@ function normalizeSettings(raw) {
     displayMode,
     hideNative: raw.hideNative == null ? DEFAULT_SETTINGS.hideNative : Boolean(raw.hideNative),
     fontSize: parsedFontSize,
+    subtitleBackground:
+      raw.subtitleBackground == null ? DEFAULT_SETTINGS.subtitleBackground : Boolean(raw.subtitleBackground),
+    subtitleBackgroundOpacity: parsedSubtitleBackgroundOpacity,
     position
   };
 }
@@ -150,6 +159,8 @@ function areSettingsEqual(a, b) {
     a.displayMode === b.displayMode &&
     a.hideNative === b.hideNative &&
     a.fontSize === b.fontSize &&
+    a.subtitleBackground === b.subtitleBackground &&
+    a.subtitleBackgroundOpacity === b.subtitleBackgroundOpacity &&
     serializePosition(a.position) === serializePosition(b.position)
   );
 }
@@ -612,20 +623,26 @@ function ensureOverlay() {
     overlay = document.createElement("div");
     overlay.id = "lc-subtitle-overlay";
 
-    const handle = document.createElement("button");
-    handle.type = "button";
-    handle.id = "lc-subtitle-drag";
-    handle.title = "Drag subtitles";
-    handle.textContent = "drag";
-    handle.addEventListener("pointerdown", onDragStart);
-
     const text = document.createElement("div");
     text.id = "lc-subtitle-text";
+    text.title = "Move subtitles";
 
-    overlay.appendChild(handle);
     overlay.appendChild(text);
     document.body.appendChild(overlay);
+  }
+
+  const oldHandle = overlay.querySelector("#lc-subtitle-drag");
+  if (oldHandle) {
+    oldHandle.remove();
+  }
+
+  const text = overlay.querySelector("#lc-subtitle-text");
+  if (text instanceof HTMLElement) {
     state.overlayTextEl = text;
+    if (!text.dataset.dragBound) {
+      text.addEventListener("pointerdown", onDragStart);
+      text.dataset.dragBound = "true";
+    }
   }
 
   return overlay;
@@ -697,6 +714,7 @@ function updateOverlayPosition() {
   applyNativeCaptionsVisibility();
 
   overlay.style.fontSize = `${state.settings.fontSize}px`;
+  applyOverlayTextVisuals();
 
   const layout = resolveOverlayLayout();
   overlay.style.left = `${Math.round(layout.x)}px`;
@@ -704,10 +722,28 @@ function updateOverlayPosition() {
   overlay.style.width = `${Math.round(layout.width)}px`;
 }
 
+function applyOverlayTextVisuals() {
+  if (!state.overlayTextEl) {
+    return;
+  }
+
+  if (!state.settings.subtitleBackground) {
+    state.overlayTextEl.style.backgroundColor = "transparent";
+    state.overlayTextEl.style.borderRadius = "0";
+    state.overlayTextEl.style.padding = "0 16px";
+    return;
+  }
+
+  const alpha = clamp(state.settings.subtitleBackgroundOpacity, 0, 100) / 100;
+  state.overlayTextEl.style.backgroundColor = `rgba(0, 0, 0, ${alpha.toFixed(2)})`;
+  state.overlayTextEl.style.borderRadius = "8px";
+  state.overlayTextEl.style.padding = "4px 14px";
+}
+
 function resolveOverlayLayout() {
   const position = state.settings.position;
   const videoRect = getVideoRect();
-  const baseWidth = videoRect ? Math.min(videoRect.width, window.innerWidth * 0.92) : window.innerWidth * 0.92;
+  const baseWidth = videoRect ? Math.min(videoRect.width, window.innerWidth * 0.52992) : window.innerWidth * 0.52992;
   const width = Math.max(240, baseWidth);
 
   if (position) {
@@ -760,7 +796,7 @@ function installStyles() {
       z-index: 2147483646;
       transform: translate(-50%, -50%);
       text-align: center;
-      width: min(92vw, 1200px);
+      width: min(52.992vw, 691.2px);
       box-sizing: border-box;
       opacity: 0;
       transition: opacity 120ms linear;
@@ -768,6 +804,8 @@ function installStyles() {
     }
 
     #lc-subtitle-text {
+      display: inline-block;
+      max-width: 100%;
       white-space: pre-line;
       line-height: 1.32;
       color: #fff;
@@ -776,28 +814,13 @@ function installStyles() {
         0 0 10px rgba(0, 0, 0, 0.9);
       padding: 0 16px;
       font-family: "Helvetica Neue", "Segoe UI", Arial, sans-serif;
-      pointer-events: none;
-      user-select: none;
-    }
-
-    #lc-subtitle-drag {
       pointer-events: auto;
+      user-select: none;
       cursor: grab;
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      background: rgba(8, 10, 16, 0.5);
-      color: #fff;
-      border-radius: 8px;
-      font-size: 11px;
-      line-height: 1;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 4px 8px;
-      margin-bottom: 6px;
     }
 
-    #lc-subtitle-overlay[data-dragging="true"] #lc-subtitle-drag {
+    #lc-subtitle-overlay[data-dragging="true"] #lc-subtitle-text {
       cursor: grabbing;
-      background: rgba(8, 10, 16, 0.75);
     }
 
     html.${HIDE_NATIVE_CLASS} video::cue {

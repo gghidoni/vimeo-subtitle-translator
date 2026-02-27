@@ -7,8 +7,9 @@ Estensione Chrome (Manifest V3) per tradurre i sottotitoli dei video su Laracast
 - Traduzione sottotitoli in tempo reale
 - Modalita `Tradotto + originale`, `Solo tradotto`, `Solo originale`
 - Selettore lingua dal popup estensione
-- Sottotitoli trascinabili in pagina (drag)
+- Sottotitoli trascinabili direttamente sul testo
 - Slider nel popup per aumentare/diminuire dimensione font
+- Toggle sfondo sottotitoli con slider opacita
 - Cache locale in memoria per evitare richieste duplicate
 
 ## Installazione locale
@@ -23,7 +24,7 @@ Estensione Chrome (Manifest V3) per tradurre i sottotitoli dei video su Laracast
 1. Apri una lezione su Laracasts
 2. Assicurati che i sottotitoli originali siano disponibili nel player
 3. Clicca l'icona estensione e scegli lingua/modalita
-4. Trascina il bottone `drag` sopra i sottotitoli per riposizionarli
+4. Trascina direttamente il testo sottotitoli per riposizionarli
 5. Usa `Reset posizione sottotitoli` nel popup per tornare alla posizione automatica
 
 ## Limiti noti
