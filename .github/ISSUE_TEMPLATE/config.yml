@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/gghidoni/vimeo-subtitle-translator/issues/new?title=%5Bsecurity%5D+
+    about: Use this for security-sensitive reports and request a private channel.
