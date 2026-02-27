@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Subtitle Translator</title>
+    <style>
+      :root {
+        --bg: #0b1320;
+        --panel: #162033;
+        --text: #eff6ff;
+        --muted: #b8c6e0;
+        --accent: #2dd4bf;
+      }
+
+      body {
+        margin: 0;
+        padding: 14px;
+        min-width: 280px;
+        background: radial-gradient(circle at 20% 20%, #1f2e4d 0%, var(--bg) 70%);
+        color: var(--text);
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      }
+
+      .card {
+        background: color-mix(in srgb, var(--panel), #000 12%);
+        border: 1px solid #314160;
+        border-radius: 12px;
+        padding: 12px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .row {
+        display: grid;
+        gap: 6px;
+      }
+
+      label,
+      legend {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      select,
+      input[type="range"],
+      .radio-group,
+      .switch,
+      button {
+        background: #10182a;
+        border: 1px solid #30415f;
+        border-radius: 8px;
+        color: var(--text);
+      }
+
+      select {
+        padding: 8px;
+        font-size: 13px;
+      }
+
+      .radio-group {
+        display: grid;
+        padding: 8px;
+        gap: 6px;
+      }
+
+      .switch {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px;
+      }
+
+      .switch input,
+      .radio-group input {
+        accent-color: var(--accent);
+      }
+
+      input[type="range"] {
+        width: 100%;
+      }
+
+      .font-value {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      button {
+        padding: 8px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="switch">
+        <span>Abilitato</span>
+        <input type="checkbox" id="enabled" />
+      </div>
+
+      <div class="switch">
+        <span>Nascondi sottotitoli player</span>
+        <input type="checkbox" id="hideNative" />
+      </div>
+
+      <div class="row">
+        <label for="targetLang">Lingua traduzione</label>
+        <select id="targetLang">
+          <option value="it">Italiano</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="pt">Português</option>
+          <option value="ja">日本語</option>
+        </select>
+      </div>
+
+      <fieldset class="row" style="border:0;padding:0;margin:0;">
+        <legend>Modalità</legend>
+        <div class="radio-group">
+          <label><input type="radio" name="displayMode" value="both" /> Tradotto + originale</label>
+          <label><input type="radio" name="displayMode" value="translated" /> Solo tradotto</label>
+          <label><input type="radio" name="displayMode" value="original" /> Solo originale</label>
+        </div>
+      </fieldset>
+
+      <div class="row">
+        <label for="fontSize">Dimensione font</label>
+        <input id="fontSize" type="range" min="16" max="72" step="1" />
+        <div class="font-value" id="fontSizeValue">32 px</div>
+      </div>
+
+      <button id="resetPosition" type="button">Reset posizione sottotitoli</button>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

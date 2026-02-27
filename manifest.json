@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Laracasts Subtitle Translator",
+  "description": "Traduce i sottotitoli dei video su Laracasts e mostra originale + traduzione.",
+  "version": "0.2.5",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://laracasts.com/*",
+    "https://*.laracasts.com/*",
+    "https://translate.googleapis.com/*",
+    "https://clients5.google.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://laracasts.com/*",
+        "https://*.laracasts.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Subtitle Translator",
+    "default_popup": "popup.html"
+  }
+}
